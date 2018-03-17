@@ -1,0 +1,81 @@
+version: '2'
+tasks:
+  default:
+    deps:
+      - task: init
+
+  init:
+    desc: Start and initialize development environment
+    cmds:
+      - cmd: if [ -f /.dockerenv ]; then echo "Don't execute it in docker app container"; false; fi
+        silent: true
+      - docker-compose build
+      - docker-compose up -d --remove-orphan
+      - docker-compose exec app sh -c "cd src/github.com/loderunner/echo/ && dep ensure -v -vendor-only"
+      - task: build
+
+  build:
+    desc: Build go-metal-api project
+    cmds:
+      - cmd: |
+          if [ -f /.dockerenv ]; then
+            go build -v -i github.com/loderunner/echo/
+          else
+            docker-compose exec -T app task build
+          fi
+
+        silent: true
+
+  protoc:
+    desc: Generate Go files from proto files
+    cmds:
+      - cmd: |
+          if [ -f /.dockerenv ]; then
+            protoc -I. \
+              -I${GOPATH}/src \
+              -I${GOPATH}/src/github.com/loderunner/echo \
+              -I${GOPATH}/src/github.com/loderunner/echo/api \
+              -I/usr/local/src/protobuf-3.5.1/src/ \
+              --go_out=plugins=grpc:. \
+              src/github.com/loderunner/echo/api/echo.proto
+
+            protoc -I. \
+              -I${GOPATH}/src \
+              -I${GOPATH}/src/github.com/loderunner/echo \
+              -I${GOPATH}/src/github.com/loderunner/echo/api \
+              -I/usr/local/src/protobuf-3.5.1/src \
+              --grpc-gateway_out=logtostderr=true:. \
+              src/github.com/loderunner/echo/api/echo.proto
+
+            protoc -I. \
+              -I${GOPATH}/src \
+              -I${GOPATH}/src/github.com/loderunner/echo \
+              -I${GOPATH}/src/github.com/loderunner/echo/api \
+              -I/usr/local/src/protobuf-3.5.1/src \
+              --swagger_out=logtostderr=true:. \
+              src/github.com/loderunner/echo/api/echo.proto
+
+          else
+            docker-compose exec -T app task protoc
+          fi
+
+        silent: true
+
+
+  enter:
+    desc: Open shell in app container
+    cmds:
+      - cmd: if [ -f /.dockerenv ]; then echo "Don't execute it in docker app container"; false; fi
+        silent: true
+      - docker-compose exec app bash
+
+  clean:
+    desc: Stop and destroy all container and clean directories
+    cmds:
+      - cmd: if [ -f /.dockerenv ]; then echo "Don't execute it in docker app container"; false; fi
+        silent: true
+      - docker-compose stop
+      - docker-compose rm -f
+      - rm src/github.com/loderunner/echo/vendor -rf
+      - rm pkg -rf
+      - rm echo -f
