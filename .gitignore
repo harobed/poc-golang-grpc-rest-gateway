@@ -1,5 +1,4 @@
 bin/
-echo
-!src/github.com/loderunner/echo/
-vendor/
 pkg/
+src/echo/vendor/
+src/echo/v1/

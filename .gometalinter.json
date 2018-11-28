@@ -1,0 +1,17 @@
+{
+  "Enable": [
+    "golint",
+    "deadcode",
+    "structcheck",
+    "varcheck",
+    "errcheck",
+    "dupl"
+  ],
+  "Exclude": [
+    "exported \\w+ (\\S*['.]*)([a-zA-Z'.*]*) should have comment or be unexported",
+    "exported const .* should have comment",
+    "^src/echo/vendor/.*"
+  ],
+  "Concurrency": 8,
+  "Vendor": true
+}

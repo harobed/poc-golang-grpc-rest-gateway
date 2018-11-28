@@ -1,10 +1,10 @@
 version: '3'
 services:
-  app:
-    build: .
+  goworkspace:
+    image: harobed/poc-golang-grpc-rest-gateway-goworkspace:develop
     entrypoint: /bin/sleep infinity
     volumes:
-      - ./:/code/
+      - ./:/goworkspace/
     ports:
       - 8080
       - 8081

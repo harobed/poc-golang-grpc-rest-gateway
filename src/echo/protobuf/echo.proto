@@ -1,9 +1,12 @@
 syntax = "proto3";
-package api;
+package echo.v1;
+
+option go_package = "echo/v1";
 
 import "google/api/annotations.proto";
 
-service Echo {
+service EchoService {
+    // Echo
     rpc Echo(EchoRequest) returns (EchoResponse) {
         option (google.api.http) = {
             post: "/echo",
